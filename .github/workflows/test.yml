@@ -1,22 +1,17 @@
 name: Run Tests
+
 on: [push]
 
 jobs:
-  RunSystemTests:
+  RunUnitTests:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
-      - name: Install pytest
-        run: pip install pytest pytest-describe
-      - name: Install requirements
-        run: pip install -r requirements.txt
-      - name: Run System Tests
-        run: |
-          # Start the server in background
-          nohup python src/squirrel_server.py &
-          sleep 5  # Give server time to start
-          pytest test_brute.py --spec
+      - name: Install pytest and plugins
+        run: pip install pytest pytest-describe pytest-spec pytest-mock
+      - name: Run unit tests
+        run: pytest test_brute.py --spec
         
   RunFunctionalTests:
     runs-on: ubuntu-latest
@@ -26,16 +21,6 @@ jobs:
       - name: Install chromedriver
         uses: nanasess/setup-chromedriver@master
       - name: Install dependencies
-        run: |
-          pip install behave selenium
-          pip install -r requirements.txt
-      - name: Run Squirrel Server
-        run: |
-          nohup python src/squirrel_server.py &
-          sleep 5
-      - name: Run HTTP Server
-        run: |
-          nohup python -m http.server 8000 &
-          sleep 3
+        run: pip install behave selenium behave-webdriver
       - name: Run functional tests
-        run: behave 
+        run: behave features/
